@@ -1,5 +1,69 @@
 # Object Detection in an Urban Environment
 
+
+## Project overview
+Self driving cars act in a complex, dynamic environment where errors can have disastrous consequences. To safely navigate this environment a self-driving cars needs to perceive and understand its surrounding. In this respect, object localization and categorization are the most important tools available.
+
+In this project, a Tensorflow object detection pipeline is trained on the [Waymo Open dataset](https://waymo.com/open/) for urban driving to detect other cars, cyclists and pedestrians.
+
+
+## Set up
+The project was developed using the Desktop environment provided in the Self Driving Car Engineer Nanodegree. In order to avoid the pre-installed Firefox from crashing when working on the notebooks of this project, upgrading Firefox to the latest version (sudo apt-get update, sudo apt-get install firefox) is required.
+
+To set-up the project locally see the 'Local Setup' section in the original task description at the end of this page.
+
+
+## Dataset
+The [Waymo Open dataset](https://waymo.com/open/) was used.  Further information on the structure of the data and on downloading it locally can be found in the original task description at the end of this page.
+
+### Dataset analysis
+The images were taken mainly in 2 different scenarios / locations: on the highway and in the cities. We have no outlier images for extremely rare scenarios such as driving in the desert with no cars around or around a corn field, where all of a sudden some human joggers could appear out of nowhere.
+
+The images are relatively well varied in terms of weather conditions, sun lighting, time of the day, how busy the streets are with other cars etc.
+
+All images contain cars. About a quarter of the images contain pedestrians in them, and very few contain bicycle riders. So there is an imbalance of classes occurences in the dataset as can be seen by this chart plotting the number of occurrences of the different classes on a randomly chosen subset:
+
+<img src="images/EDA01.png">
+
+The task for the algorithm was to classify the moving objects belonging in any of these 3 categories with the correct label and to represent them visually in the images surrounded within rectangular bounding boxes with edges of color red, blue and green respectively.
+
+Some cars further away (either moving or parked, in well lit or dark photos) are not reliably detected as such, meaning they are either not recognised as cars or they are recognised or not depending on the image frame (in successive timestamps of same image).
+
+Other moving objects such as vans or trucks for example are classified as cars also (they unfortunaltey do not have a separate label for this task). Other extraordinary vehicles like motorcycles, firefigther trucks or ambulances have not been spotted in the initial data exploration. Thus, no comment on how they are classified or whether these exist at all in the dataset can be made.
+
+### Cross validation
+The dataset is split into train (86 segment files), test (3 segment files) and evaluation (10 segment files) data. The default split is kept, since it seems to balance maximizing training examples while also ensuring a meaningful evaluation. In addition to this, keeping the default split increases the comparability of the results with other implementations.
+
+## Training
+### Reference experiment
+The residual network model (Resnet) without additional augmentations was used for the first experiment. The results of the experiment can be seen below.
+
+<img src="images/Eval03.png">
+
+As can be seen, there is a significant gap in the localization loss between training and evaluation. This indicates overfitting of the location of the detection.
+
+
+### Improve on the reference
+To improve the performance of the model several augmentations of the model were performed.
+
+In addition to the two already used augmentations (random_horizontal_flip and random_crop_image) the following ones where experimented with in the Explore augmenations notebook:
+* random_black_patches
+* random_adjust_brightness
+* random_adjust_contrast
+* random_jitter_boxes
+
+The motiviation behind using random_adjust_brightness was the observation that most images in the dataset seem to be in clear conditions. By adjusting the brightness unusual weather conditions that typically affect the brightness should be better represented in the dataset.
+
+It could be seen that in a lot of images a lot of object clusters were present:
+
+<img src="images/BoundingBoxImage02.png">
+
+To differentiate between these better random_adjust_contrast and random_jitter_boxes were used to emphasize the boundaries between them. Furthermore, random_black_patches was used to emphasize the resulting overlap of objects.
+
+TODO: images
+
+# Original Task Description
+
 ## Data
 
 For this project, we will be using data from the [Waymo Open dataset](https://waymo.com/open/).
@@ -138,23 +202,3 @@ Finally, you can create a video of your model's inferences for any tf record fil
 python inference_video.py --labelmap_path label_map.pbtxt --model_path experiments/reference/exported/saved_model --tf_record_path /data/waymo/testing/segment-12200383401366682847_2552_140_2572_140_with_camera_labels.tfrecord --config_path experiments/reference/pipeline_new.config --output_path animation.gif
 ```
 
-## Submission Template
-
-### Project overview
-This section should contain a brief description of the project and what we are trying to achieve. Why is object detection such an important component of self driving car systems?
-
-### Set up
-This section should contain a brief description of the steps to follow to run the code for this repository.
-
-### Dataset
-#### Dataset analysis
-This section should contain a quantitative and qualitative description of the dataset. It should include images, charts and other visualizations.
-#### Cross validation
-This section should detail the cross validation strategy and justify your approach.
-
-### Training
-#### Reference experiment
-This section should detail the results of the reference experiment. It should includes training metrics and a detailed explanation of the algorithm's performances.
-
-#### Improve on the reference
-This section should highlight the different strategies you adopted to improve your model. It should contain relevant figures and details of your findings.
