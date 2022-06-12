@@ -60,7 +60,7 @@ It could be seen that in a lot of images a lot of object clusters were present:
 
 To differentiate between these better random_adjust_contrast and random_jitter_boxes were used to emphasize the boundaries between them. Furthermore, random_black_patches was used to emphasize the resulting overlap of objects.
 
-TODO: images
+<img src="images/EvalAug03.PNG">
 
 # Original Task Description
 
